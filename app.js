@@ -1,24 +1,43 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "media/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, uuidv4());
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "audio/mpeg") {
+    cb(null, true);
+  } else {
+    cb(new Error(`Только аудио файлы! ${file.mimetype}`), false);
+  }
+};
 const authRoutes = require("./routes/authRoutes");
+const mediaRoutes = require("./routes/mediaRoutes");
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-
-// Тестовый роут
-app.get("/", (req, res) => {
-  res.send("Audio/Video Service API");
-});
+app.use(multer({ storage: storage, fileFilter: fileFilter }).single("music"));
+app.use("/media", express.static(path.join(__dirname, "media")));
 
 // Роуты авторизации
 app.use("/api/auth", authRoutes);
+// Роуты медиа
+app.use("/api/media", mediaRoutes);
 
 //Обработка ошибок
 
