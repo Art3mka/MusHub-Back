@@ -12,4 +12,10 @@ router.get("/", isAuth, mediaController.getAllMedia);
 
 router.get("/:mediaId", isAuth, mediaController.getMediaById);
 
+router.post("/like/:mediaId", isAuth, mediaController.toggleLike);
+
+router.post("/comment/:mediaId", isAuth, mediaController.addComment);
+
+router.get("/comment/:mediaId", isAuth, mediaController.getComments);
+
 module.exports = router;

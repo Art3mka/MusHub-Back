@@ -1,4 +1,6 @@
 const Media = require("../models/Media");
+const Like = require("../models/Like");
+const Comment = require("../models/Comment");
 
 exports.uploadMedia = async (req, res, next) => {
   const title = req.body.title;
@@ -45,6 +47,69 @@ exports.getMediaById = async (req, res) => {
     await media.save();
 
     res.json(media);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.toggleLike = async (req, res) => {
+  try {
+    const { mediaId } = req.params;
+
+    // Проверяем, есть ли уже лайк
+    const existingLike = await Like.findOne({
+      userId: req.userId,
+      mediaId: mediaId,
+    });
+
+    if (existingLike) {
+      // Удаляем лайк
+      await Like.findByIdAndDelete(existingLike._id);
+      await Media.findByIdAndUpdate(mediaId, { $inc: { likes: -1 } });
+      return res.json({ liked: false });
+    } else {
+      // Добавляем лайк
+      const like = new Like({
+        userId: req.userId,
+        mediaId: mediaId,
+      });
+
+      const result = await like.save();
+      await Media.findByIdAndUpdate(mediaId, { $inc: { likes: 1 } });
+      return res.json({ liked: true });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.addComment = async (req, res) => {
+  try {
+    const { mediaId } = req.params;
+    const { text } = req.body;
+
+    const comment = new Comment({
+      text: text,
+      userId: req.userId,
+      mediaId: mediaId,
+    });
+    console.log(comment);
+
+    const result = await comment.save();
+
+    console.log(result);
+
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getComments = async (req, res) => {
+  const { mediaId } = req.params;
+  try {
+    const comments = await Comment.find({ mediaId: mediaId }).populate("userId", "name");
+    res.status(200).json(comments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

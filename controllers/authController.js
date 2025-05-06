@@ -42,7 +42,24 @@ exports.login = async (req, res, next) => {
     const token = jwt.sign({ email: user.email, userId: user._id.toString() }, process.env.JWT_SECRET_KEY, {
       expiresIn: "1h",
     });
-    res.status(200).json({ token: token, userId: user._id.toString() });
+    res.status(200).json({ token: token, userId: user._id.toString(), username: user.name });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
+
+exports.verifyToken = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+    if (!user) {
+      const error = new Error("User not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json(user);
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
