@@ -12,6 +12,8 @@ router.get("/", isAuth, mediaController.getAllMedia);
 
 router.get("/:mediaId", isAuth, mediaController.getMediaById);
 
+router.get("/:mediaId/check-like", isAuth, mediaController.checkLike);
+
 router.post("/like/:mediaId", isAuth, mediaController.toggleLike);
 
 router.post("/comment/:mediaId", isAuth, mediaController.addComment);
