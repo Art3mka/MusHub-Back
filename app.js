@@ -28,6 +28,7 @@ const fileFilter = (req, file, cb) => {
 const authRoutes = require("./routes/authRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 const playlistRoutes = require("./routes/playlistRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // Middleware
 app.use(cors());
@@ -41,6 +42,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/media", mediaRoutes);
 // Роуты плейлистов
 app.use("/api/playlists", playlistRoutes);
+// Роуты юзера
+app.use("/api/users", userRoutes);
 
 //Обработка ошибок
 app.use((error, req, res, next) => {

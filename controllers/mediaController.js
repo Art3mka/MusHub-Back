@@ -1,6 +1,7 @@
 const Media = require("../models/Media");
 const Like = require("../models/Like");
 const Comment = require("../models/Comment");
+const User = require("../models/User");
 
 exports.uploadMedia = async (req, res, next) => {
   const title = req.body.title;
@@ -17,6 +18,9 @@ exports.uploadMedia = async (req, res, next) => {
       mimetype: music.mimetype,
     });
     const result = await media.save();
+    await User.findByIdAndUpdate(req.userId, {
+      $push: { uploadedMedia: result._id },
+    });
     res.status(200).json({ message: result });
   } catch (err) {
     if (!err.statusCode) {
@@ -66,6 +70,7 @@ exports.toggleLike = async (req, res) => {
       // Удаляем лайк
       await Like.findByIdAndDelete(existingLike._id);
       await Media.findByIdAndUpdate(mediaId, { $inc: { likes: -1 } });
+      await User.findByIdAndUpdate(req.userId, { $pull: { likedMedia: mediaId } });
       return res.json({ liked: false });
     } else {
       // Добавляем лайк
@@ -73,9 +78,9 @@ exports.toggleLike = async (req, res) => {
         userId: req.userId,
         mediaId: mediaId,
       });
-
       const result = await like.save();
       await Media.findByIdAndUpdate(mediaId, { $inc: { likes: 1 } });
+      await User.findByIdAndUpdate(req.userId, { $addToSet: { likedMedia: mediaId } });
       return res.json({ liked: true });
     }
   } catch (err) {
@@ -123,6 +128,22 @@ exports.checkLike = async (req, res) => {
       mediaId: mediaId,
     });
     res.json({ liked: !!like });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.searchMedia = async (req, res) => {
+  try {
+    const { query } = req.query;
+    console.log(query);
+    if (!query || query.length < 2) {
+      return res.status(400).json({ error: "Минимум 2 символа" });
+    }
+    const results = await Media.find({ title: query }).populate("authorId", "name");
+
+    console.log(results);
+    res.status(200).json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

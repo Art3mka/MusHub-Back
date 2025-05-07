@@ -10,6 +10,8 @@ router.post("/upload", isAuth, mediaController.uploadMedia);
 
 router.get("/", isAuth, mediaController.getAllMedia);
 
+router.get("/search", isAuth, mediaController.searchMedia);
+
 router.get("/:mediaId", isAuth, mediaController.getMediaById);
 
 router.get("/:mediaId/check-like", isAuth, mediaController.checkLike);

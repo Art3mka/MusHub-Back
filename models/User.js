@@ -15,7 +15,23 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    role: { type: String, enum: ["admin", "user", "guest"], default: "user" },
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+    },
+    likedMedia: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Media",
+      },
+    ],
+    uploadedMedia: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Media",
+      },
+    ],
   },
   {
     timestamps: true,
