@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const Media = require("../models/Media");
 const Like = require("../models/Like");
 const Comment = require("../models/Comment");
@@ -30,6 +32,33 @@ exports.uploadMedia = async (req, res, next) => {
   }
 };
 
+exports.deleteMedia = async (req, res, next) => {
+  try {
+    const { mediaId } = req.params;
+    const userId = req.userId;
+
+    const media = await Media.findOneAndDelete({
+      _id: mediaId,
+      authorId: userId,
+    });
+
+    if (!media) {
+      return res.status(404).json({ error: "Трек не найден" });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { uploadedMedia: mediaId },
+    });
+
+    if (fs.existsSync(media.path)) {
+      fs.unlinkSync(media.path);
+    }
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getAllMedia = async (req, res, next) => {
   try {
     const media = await Media.find().populate("authorId", "name");
@@ -56,7 +85,7 @@ exports.getMediaById = async (req, res) => {
   }
 };
 
-exports.toggleLike = async (req, res) => {
+exports.toggleLike = async (req, res, next) => {
   try {
     const { mediaId } = req.params;
 
@@ -88,7 +117,7 @@ exports.toggleLike = async (req, res) => {
   }
 };
 
-exports.addComment = async (req, res) => {
+exports.addComment = async (req, res, next) => {
   try {
     const { mediaId } = req.params;
     const { text } = req.body;
@@ -110,7 +139,7 @@ exports.addComment = async (req, res) => {
   }
 };
 
-exports.getComments = async (req, res) => {
+exports.getComments = async (req, res, next) => {
   const { mediaId } = req.params;
   try {
     const comments = await Comment.find({ mediaId: mediaId }).populate("userId", "name");
@@ -120,7 +149,7 @@ exports.getComments = async (req, res) => {
   }
 };
 
-exports.checkLike = async (req, res) => {
+exports.checkLike = async (req, res, next) => {
   const { mediaId } = req.params;
   try {
     const like = await Like.findOne({
@@ -133,7 +162,7 @@ exports.checkLike = async (req, res) => {
   }
 };
 
-exports.searchMedia = async (req, res) => {
+exports.searchMedia = async (req, res, next) => {
   try {
     const { query } = req.query;
     console.log(query);

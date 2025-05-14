@@ -8,6 +8,8 @@ const isAuth = require("../middleware/isAuth");
 
 router.post("/upload", isAuth, mediaController.uploadMedia);
 
+router.delete("/:mediaId", isAuth, mediaController.deleteMedia);
+
 router.get("/", isAuth, mediaController.getAllMedia);
 
 router.get("/search", isAuth, mediaController.searchMedia);
