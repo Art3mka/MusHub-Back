@@ -53,7 +53,31 @@ exports.deleteMedia = async (req, res, next) => {
     if (fs.existsSync(media.path)) {
       fs.unlinkSync(media.path);
     }
-    res.json({ success: true });
+    res.status(200).json({ success: true });
+  } catch {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateMedia = async (req, res, next) => {
+  try {
+    const { mediaId } = req.params;
+    const userId = req.userId;
+    const updateTitle = req.body.title;
+
+    const media = await Media.findOneAndUpdate(
+      {
+        _id: mediaId,
+        authorId: userId,
+      },
+      { $set: { title: updateTitle } }
+    );
+
+    if (!media) {
+      return res.status(404).json({ error: "Трек не найден" });
+    }
+
+    res.status(200).json({ success: true });
   } catch {
     res.status(500).json({ error: err.message });
   }

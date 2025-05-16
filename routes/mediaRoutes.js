@@ -10,6 +10,8 @@ router.post("/upload", isAuth, mediaController.uploadMedia);
 
 router.delete("/:mediaId", isAuth, mediaController.deleteMedia);
 
+router.put("/:mediaId", isAuth, mediaController.updateMedia);
+
 router.get("/", isAuth, mediaController.getAllMedia);
 
 router.get("/search", isAuth, mediaController.searchMedia);
