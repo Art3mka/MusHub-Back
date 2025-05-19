@@ -29,6 +29,7 @@ const authRoutes = require("./routes/authRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 const playlistRoutes = require("./routes/playlistRoutes");
 const userRoutes = require("./routes/userRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 // Middleware
 app.use(cors());
@@ -44,6 +45,8 @@ app.use("/api/media", mediaRoutes);
 app.use("/api/playlists", playlistRoutes);
 // Роуты юзера
 app.use("/api/users", userRoutes);
+// Роуты категорий
+app.use("/api/category", categoryRoutes);
 
 //Обработка ошибок
 app.use((error, req, res, next) => {

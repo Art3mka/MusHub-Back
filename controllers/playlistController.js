@@ -2,7 +2,7 @@ const Playlist = require("../models/Playlist");
 const Media = require("../models/Media");
 
 // Создание плейлиста
-exports.createPlaylist = async (req, res) => {
+exports.createPlaylist = async (req, res, next) => {
   try {
     const { name, description, isPublic } = req.body;
     const playlist = new Playlist({
@@ -19,7 +19,7 @@ exports.createPlaylist = async (req, res) => {
 };
 
 // Добавление медиа в плейлист
-exports.addToPlaylist = async (req, res) => {
+exports.addToPlaylist = async (req, res, next) => {
   try {
     //надо переделать через body
     const { playlistId, mediaId } = req.params;
@@ -41,7 +41,7 @@ exports.addToPlaylist = async (req, res) => {
 };
 
 // Получение плейлистов пользователя
-exports.getUserPlaylists = async (req, res) => {
+exports.getUserPlaylists = async (req, res, next) => {
   try {
     const playlists = await Playlist.find({ authorId: req.userId }).populate("mediaItems", "title");
     if (!playlists) {
@@ -54,7 +54,7 @@ exports.getUserPlaylists = async (req, res) => {
 };
 
 // Получение песен в плейлисте
-exports.getPlaylistById = async (req, res) => {
+exports.getPlaylistById = async (req, res, next) => {
   const { playlistId } = req.params;
   try {
     const playlist = await Playlist.findById(playlistId)
@@ -77,7 +77,7 @@ exports.getPlaylistById = async (req, res) => {
 };
 
 // Удаление песен из плейлиста
-exports.removeFromPlaylist = async (req, res) => {
+exports.removeFromPlaylist = async (req, res, next) => {
   try {
     const { playlistId, mediaId } = req.params;
 
@@ -98,7 +98,7 @@ exports.removeFromPlaylist = async (req, res) => {
 };
 
 // Обновление информации о плейлисте
-exports.updatePlaylist = async (req, res) => {
+exports.updatePlaylist = async (req, res, next) => {
   const { playlistId } = req.params;
   try {
     const { name, description, isPublic } = req.body;
@@ -120,7 +120,7 @@ exports.updatePlaylist = async (req, res) => {
 };
 
 // Удаление плейлиста
-exports.deletePlaylist = async (req, res) => {
+exports.deletePlaylist = async (req, res, next) => {
   const { playlistId } = req.params;
   try {
     const playlist = await Playlist.findOneAndDelete({

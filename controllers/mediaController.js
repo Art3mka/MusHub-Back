@@ -4,9 +4,11 @@ const Media = require("../models/Media");
 const Like = require("../models/Like");
 const Comment = require("../models/Comment");
 const User = require("../models/User");
+const Category = require("../models/Category");
 
 exports.uploadMedia = async (req, res, next) => {
   const title = req.body.title;
+  const categoryId = req.body.categoryId;
   const music = req.file;
   try {
     if (!req.file) {
@@ -14,6 +16,7 @@ exports.uploadMedia = async (req, res, next) => {
     }
     const media = new Media({
       title: title,
+      categoryId: categoryId,
       filename: music.filename,
       path: music.path,
       authorId: req.userId,
@@ -95,7 +98,7 @@ exports.getAllMedia = async (req, res, next) => {
 exports.getMediaById = async (req, res) => {
   try {
     const mediaId = req.params.mediaId;
-    const media = await Media.findById(mediaId).populate("authorId", "name");
+    const media = await Media.findById(mediaId).populate("authorId", "name").populate("categoryId", "title");
     if (!media) {
       return res.status(404).json({ error: "Файл не найден" });
     }
@@ -199,5 +202,25 @@ exports.searchMedia = async (req, res, next) => {
     res.status(200).json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getMediaByCategories = async (req, res, next) => {
+  try {
+    const { sort = "likes", category } = req.query; // по умолчанию сортируем по лайкам
+    const sortOptions = {};
+
+    if (category) {
+      sortOptions.categoryId = category;
+    }
+
+    const media = await Media.find(sortOptions)
+      .sort({ [sort]: -1 })
+      .populate("categoryId")
+      .populate("authorId");
+
+    res.status(200).json(media);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка при получении медиа", error });
   }
 };

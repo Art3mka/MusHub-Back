@@ -7,6 +7,11 @@ const mediaSchema = new Schema({
     type: String,
     required: true,
   },
+  categoryId: {
+    type: Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
+  },
   // description: { type: String },
   filename: {
     type: String,

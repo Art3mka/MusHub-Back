@@ -6,15 +6,17 @@ const router = express.Router();
 
 const isAuth = require("../middleware/isAuth");
 
+router.get("/", isAuth, mediaController.getAllMedia);
+
+router.get("/categories", mediaController.getMediaByCategories);
+
+router.get("/search", isAuth, mediaController.searchMedia);
+
 router.post("/upload", isAuth, mediaController.uploadMedia);
 
 router.delete("/:mediaId", isAuth, mediaController.deleteMedia);
 
 router.put("/:mediaId", isAuth, mediaController.updateMedia);
-
-router.get("/", isAuth, mediaController.getAllMedia);
-
-router.get("/search", isAuth, mediaController.searchMedia);
 
 router.get("/:mediaId", isAuth, mediaController.getMediaById);
 
