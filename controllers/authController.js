@@ -39,10 +39,14 @@ exports.login = async (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
-    const token = jwt.sign({ email: user.email, userId: user._id.toString() }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h",
-    });
-    res.status(200).json({ token: token, userId: user._id.toString(), username: user.name });
+    const token = jwt.sign(
+      { email: user.email, userId: user._id.toString(), role: user.role },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.status(200).json({ token: token, userId: user._id.toString(), username: user.name, role: user.role });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

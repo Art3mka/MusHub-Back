@@ -40,21 +40,35 @@ exports.deleteMedia = async (req, res, next) => {
     const { mediaId } = req.params;
     const userId = req.userId;
 
-    const media = await Media.findOneAndDelete({
-      _id: mediaId,
-      authorId: userId,
-    });
+    const media = await Media.findById(mediaId);
 
     if (!media) {
       return res.status(404).json({ error: "Трек не найден" });
     }
+    const authorId = media.authorId;
 
-    await User.findByIdAndUpdate(userId, {
-      $pull: { uploadedMedia: mediaId },
-    });
+    if (media.authorId.toString() !== userId.toString() && req.userRole === "ADMIN") {
+      await media.deleteOne();
 
-    if (fs.existsSync(media.path)) {
-      fs.unlinkSync(media.path);
+      await User.findByIdAndUpdate(authorId, {
+        $pull: { uploadedMedia: mediaId },
+      });
+
+      if (fs.existsSync(media.path)) {
+        fs.unlinkSync(media.path);
+      }
+    }
+
+    if (media.authorId.toString() === userId.toString()) {
+      await media.deleteOne();
+
+      await User.findByIdAndUpdate(userId, {
+        $pull: { uploadedMedia: mediaId },
+      });
+
+      if (fs.existsSync(media.path)) {
+        fs.unlinkSync(media.path);
+      }
     }
     res.status(200).json({ success: true });
   } catch {
@@ -67,17 +81,20 @@ exports.updateMedia = async (req, res, next) => {
     const { mediaId } = req.params;
     const userId = req.userId;
     const updateTitle = req.body.title;
+    const updateCategory = req.body.categoryId;
 
-    const media = await Media.findOneAndUpdate(
-      {
-        _id: mediaId,
-        authorId: userId,
-      },
-      { $set: { title: updateTitle } }
-    );
+    const media = await Media.findById(mediaId);
 
     if (!media) {
       return res.status(404).json({ error: "Трек не найден" });
+    }
+
+    if (media.authorId.toString() !== userId.toString() && req.userRole === "ADMIN") {
+      const result = await media.updateOne({ $set: { title: updateTitle, categoryId: updateCategory } });
+    }
+
+    if (media.authorId.toString() === userId.toString()) {
+      const result = await media.updateOne({ $set: { title: updateTitle, categoryId: updateCategory } });
     }
 
     res.status(200).json({ success: true });
@@ -88,7 +105,7 @@ exports.updateMedia = async (req, res, next) => {
 
 exports.getAllMedia = async (req, res, next) => {
   try {
-    const media = await Media.find().populate("authorId", "name");
+    const media = await Media.find().populate("authorId", "name").populate("categoryId", "title");
     res.json(media);
   } catch (err) {
     res.status(500).json({ error: err.message });
