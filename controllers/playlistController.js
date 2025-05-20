@@ -1,7 +1,6 @@
 const Playlist = require("../models/Playlist");
 const Media = require("../models/Media");
 
-// Создание плейлиста
 exports.createPlaylist = async (req, res, next) => {
   try {
     const { name, description, isPublic } = req.body;
@@ -18,10 +17,8 @@ exports.createPlaylist = async (req, res, next) => {
   }
 };
 
-// Добавление медиа в плейлист
 exports.addToPlaylist = async (req, res, next) => {
   try {
-    //надо переделать через body
     const { playlistId, mediaId } = req.params;
 
     const updatedPlaylist = await Playlist.findOneAndUpdate(
@@ -40,7 +37,6 @@ exports.addToPlaylist = async (req, res, next) => {
   }
 };
 
-// Получение плейлистов пользователя
 exports.getUserPlaylists = async (req, res, next) => {
   try {
     const playlists = await Playlist.find({ authorId: req.userId }).populate("mediaItems", "title");
@@ -53,7 +49,6 @@ exports.getUserPlaylists = async (req, res, next) => {
   }
 };
 
-// Получение песен в плейлисте
 exports.getPlaylistById = async (req, res, next) => {
   const { playlistId } = req.params;
   try {
@@ -65,7 +60,6 @@ exports.getPlaylistById = async (req, res, next) => {
       return res.status(404).json({ error: "Плейлист не найден" });
     }
 
-    // Проверяем доступ (публичный или владелец)
     if (!playlist.isPublic && playlist.authorId._id.toString() !== req.userId) {
       return res.status(403).json({ error: "Нет доступа к этому плейлисту" });
     }
@@ -76,7 +70,6 @@ exports.getPlaylistById = async (req, res, next) => {
   }
 };
 
-// Удаление песен из плейлиста
 exports.removeFromPlaylist = async (req, res, next) => {
   try {
     const { playlistId, mediaId } = req.params;
@@ -97,7 +90,6 @@ exports.removeFromPlaylist = async (req, res, next) => {
   }
 };
 
-// Обновление информации о плейлисте
 exports.updatePlaylist = async (req, res, next) => {
   const { playlistId } = req.params;
   try {
@@ -119,7 +111,6 @@ exports.updatePlaylist = async (req, res, next) => {
   }
 };
 
-// Удаление плейлиста
 exports.deletePlaylist = async (req, res, next) => {
   const { playlistId } = req.params;
   try {

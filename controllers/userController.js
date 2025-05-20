@@ -27,7 +27,7 @@ exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({}, "-password");
     if (!users) {
-      return res.status(404).json({ error: "Users not found" });
+      return res.status(404).json({ error: "Пользователь не найден" });
     }
 
     res.status(200).json({ users });
@@ -42,7 +42,7 @@ exports.updateUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(userId, { name, role }, { new: true });
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "Пользователь не найден" });
     }
     res.status(200).json({ user });
   } catch (err) {

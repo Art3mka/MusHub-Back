@@ -4,7 +4,6 @@ const Media = require("../models/Media");
 const Like = require("../models/Like");
 const Comment = require("../models/Comment");
 const User = require("../models/User");
-const Category = require("../models/Category");
 
 exports.uploadMedia = async (req, res, next) => {
   const title = req.body.title;
@@ -133,20 +132,17 @@ exports.toggleLike = async (req, res, next) => {
   try {
     const { mediaId } = req.params;
 
-    // Проверяем, есть ли уже лайк
     const existingLike = await Like.findOne({
       userId: req.userId,
       mediaId: mediaId,
     });
 
     if (existingLike) {
-      // Удаляем лайк
       await Like.findByIdAndDelete(existingLike._id);
       await Media.findByIdAndUpdate(mediaId, { $inc: { likes: -1 } });
       await User.findByIdAndUpdate(req.userId, { $pull: { likedMedia: mediaId } });
       return res.json({ liked: false });
     } else {
-      // Добавляем лайк
       const like = new Like({
         userId: req.userId,
         mediaId: mediaId,
@@ -209,13 +205,10 @@ exports.checkLike = async (req, res, next) => {
 exports.searchMedia = async (req, res, next) => {
   try {
     const { query } = req.query;
-    console.log(query);
     if (!query || query.length < 2) {
       return res.status(400).json({ error: "Минимум 2 символа" });
     }
-    const results = await Media.find({ title: query }).populate("authorId", "name");
-
-    console.log(results);
+    const results = await Media.find({ title: { $regex: query, $options: "i" } }).populate("authorId", "name");
     res.status(200).json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -224,7 +217,7 @@ exports.searchMedia = async (req, res, next) => {
 
 exports.getMediaByCategories = async (req, res, next) => {
   try {
-    const { sort = "likes", category } = req.query; // по умолчанию сортируем по лайкам
+    const { sort = "likes", category } = req.query;
     const sortOptions = {};
 
     if (category) {
