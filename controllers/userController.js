@@ -39,6 +39,9 @@ exports.getAllUsers = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   const { userId } = req.params;
   const { name, role } = req.body;
+  if (req.userRole !== "ADMIN") {
+    return res.status(403).json({ error: "Недостаточно прав" });
+  }
   try {
     const user = await User.findByIdAndUpdate(userId, { name, role }, { new: true });
     if (!user) {
@@ -52,6 +55,9 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
   const { userId } = req.params;
+  if (req.userRole !== "ADMIN") {
+    return res.status(403).json({ error: "Недостаточно прав" });
+  }
   try {
     const result = await User.findByIdAndDelete(userId);
     res.status(200).json({ result });

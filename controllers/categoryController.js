@@ -48,7 +48,7 @@ exports.deleteCategory = async (req, res, next) => {
     return res.status(403).json({ message: "Недостаточно прав для данного действия" });
   }
   try {
-    const result = await Category.findByIdAndDelete(categoryId, { title });
+    const result = await Category.findByIdAndDelete(categoryId);
     res.status(200).json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
