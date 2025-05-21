@@ -99,7 +99,9 @@ exports.updatePlaylist = async (req, res, next) => {
       { _id: playlistId, authorId: req.userId },
       { name, description, isPublic },
       { new: true }
-    ).populate("mediaItems", "title path");
+    )
+      .populate("mediaItems", "title path")
+      .populate("authorId", "username");
 
     if (!playlist) {
       return res.status(404).json({ error: "Плейлист не найден или нет прав" });

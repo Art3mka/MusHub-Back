@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Comment = require("../models/Comment");
 
 exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
@@ -60,6 +61,10 @@ exports.deleteUser = async (req, res, next) => {
   }
   try {
     const result = await User.findByIdAndDelete(userId);
+    const comments = await Comment.find({ userId });
+    for (const comment of comments) {
+      await comment.deleteOne();
+    }
     res.status(200).json({ result });
   } catch (err) {
     res.status(500).json({ error: err.message });
