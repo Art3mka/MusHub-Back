@@ -26,6 +26,8 @@ router.put("/:mediaId", isAuth, mediaController.updateMedia);
 
 router.get("/:mediaId", isAuth, mediaController.getMediaById);
 
+router.post("/:mediaId/listens", isAuth, mediaController.incrementListens);
+
 router.get("/:mediaId/check-like", isAuth, mediaController.checkLike);
 
 module.exports = router;

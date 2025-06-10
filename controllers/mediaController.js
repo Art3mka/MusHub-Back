@@ -8,6 +8,7 @@ const User = require("../models/User");
 exports.uploadMedia = async (req, res, next) => {
   const title = req.body.title;
   const categoryId = req.body.categoryId;
+  const authorName = req.body.authorName;
   const music = req.file;
   try {
     if (!req.file) {
@@ -19,6 +20,7 @@ exports.uploadMedia = async (req, res, next) => {
       filename: music.filename,
       path: music.path,
       authorId: req.userId,
+      authorName: authorName,
       mimetype: music.mimetype,
     });
     const result = await media.save();
@@ -111,7 +113,7 @@ exports.getAllMedia = async (req, res, next) => {
   }
 };
 
-exports.getMediaById = async (req, res) => {
+exports.getMediaById = async (req, res, next) => {
   try {
     const mediaId = req.params.mediaId;
     const media = await Media.findById(mediaId).populate("authorId", "name").populate("categoryId", "title");
@@ -119,10 +121,24 @@ exports.getMediaById = async (req, res) => {
       return res.status(404).json({ error: "Файл не найден" });
     }
 
+    res.json(media);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.incrementListens = async (req, res, next) => {
+  try {
+    const mediaId = req.params.mediaId;
+    const media = await Media.findById(mediaId);
+    if (!media) {
+      return res.status(404).json({ error: "Файл не найден" });
+    }
+
     media.listens += 1;
     await media.save();
 
-    res.json(media);
+    res.json(media.listens);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

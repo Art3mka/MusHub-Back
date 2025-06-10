@@ -31,6 +31,10 @@ const mediaSchema = new Schema({
     ref: "User",
     required: true,
   },
+  authorName: {
+    type: String,
+    required: true,
+  },
   listens: {
     type: Number,
     default: 0,
