@@ -12,8 +12,8 @@ exports.createCategory = async (req, res, next) => {
     const category = new Category({
       title: title,
     });
-    const result = await category.save();
-    res.status(200).json({ message: result });
+    const newCategory = await category.save();
+    res.status(200).json({ newCategory });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -35,8 +35,11 @@ exports.updateCategory = async (req, res, next) => {
     return res.status(403).json({ message: "Недостаточно прав для данного действия" });
   }
   try {
-    const category = await Category.findByIdAndUpdate(categoryId, { title }, { new: true });
-    res.status(200).json(category);
+    const updatedCategory = await Category.findByIdAndUpdate(categoryId, { title }, { new: true });
+    if (!updatedCategory) {
+      return res.status(404).json({ error: "Категория не найдена" });
+    }
+    res.status(200).json({ updatedCategory });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

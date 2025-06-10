@@ -72,7 +72,7 @@ exports.deleteMedia = async (req, res, next) => {
       }
     }
     res.status(200).json({ success: true });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
@@ -85,21 +85,23 @@ exports.updateMedia = async (req, res, next) => {
     const updateCategory = req.body.categoryId;
 
     const media = await Media.findById(mediaId);
+    let updatedMedia = null;
 
-    if (!media) {
+    if (req.userRole === "ADMIN" || media.authorId.toString() === userId.toString()) {
+      updatedMedia = await Media.findByIdAndUpdate(
+        mediaId,
+        { title: updateTitle, categoryId: updateCategory },
+        { new: true }
+      )
+        .populate("authorId", "name")
+        .populate("categoryId", "title");
+    }
+    if (!updatedMedia) {
       return res.status(404).json({ error: "Трек не найден" });
     }
-
-    if (media.authorId.toString() !== userId.toString() && req.userRole === "ADMIN") {
-      const result = await media.updateOne({ $set: { title: updateTitle, categoryId: updateCategory } });
-    }
-
-    if (media.authorId.toString() === userId.toString()) {
-      const result = await media.updateOne({ $set: { title: updateTitle, categoryId: updateCategory } });
-    }
-
-    res.status(200).json({ success: true });
-  } catch {
+    console.log(updatedMedia);
+    res.status(200).json({ updatedMedia });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };

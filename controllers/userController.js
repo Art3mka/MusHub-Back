@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Comment = require("../models/Comment");
+const Media = require("../models/Media");
 
 exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
@@ -44,11 +45,12 @@ exports.updateUser = async (req, res, next) => {
     return res.status(403).json({ error: "Недостаточно прав" });
   }
   try {
-    const user = await User.findByIdAndUpdate(userId, { name, role }, { new: true });
-    if (!user) {
+    const updatedUser = await User.findByIdAndUpdate(userId, { name, role }, { new: true });
+    if (!updatedUser) {
       return res.status(404).json({ error: "Пользователь не найден" });
     }
-    res.status(200).json({ user });
+    await Media.updateMany({ authorId: userId }, { $set: { authorName: name } });
+    res.status(200).json({ updatedUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
